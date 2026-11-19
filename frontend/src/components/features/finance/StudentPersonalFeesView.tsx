@@ -42,7 +42,8 @@ export const StudentPersonalFeesView: React.FC<StudentPersonalFeesViewProps> = (
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   const studentId = user?.studentProfile?.id;
-  const { data: liveInvoices = [], isLoading: isInvoicesLoading } = useInvoices({ studentId });
+  // No `= []` default here: a fresh array each render would retrigger the sync effect below forever
+  const { data: liveInvoices, isLoading: isInvoicesLoading } = useInvoices({ studentId });
   const { mutate: collectPayment, isPending: isProcessingPayment } = useCollectPayment();
 
   // Sync live invoices
@@ -436,9 +437,9 @@ export const StudentPersonalFeesView: React.FC<StudentPersonalFeesViewProps> = (
         {payingInstallment && (
           <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
+              initial={{ scale: 0.98, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              exit={{ scale: 0.98, opacity: 0 }}
               className="bg-surface rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-border space-y-5"
             >
               <div className="flex items-center justify-between pb-3 border-b border-border">
@@ -576,9 +577,9 @@ export const StudentPersonalFeesView: React.FC<StudentPersonalFeesViewProps> = (
         {selectedReceipt && (
           <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
+              initial={{ scale: 0.98, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              exit={{ scale: 0.98, opacity: 0 }}
               className="bg-surface rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-border space-y-6 text-primary"
             >
               <div className="flex items-start justify-between pb-4 border-b-2 border-border">

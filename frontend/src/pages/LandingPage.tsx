@@ -73,7 +73,7 @@ const lineReveal: Variants = {
 
 // Gentle fade-up for supporting copy
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 8 },
   visible: (delay: number = 0) => ({
     opacity: 1,
     y: 0,
@@ -137,7 +137,7 @@ const SectionHeading: React.FC<{
   return (
     <div ref={ref} className="text-center max-w-3xl mx-auto space-y-5">
       <motion.span
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={isInView ? { opacity: 1, scale: 1 } : {}}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className={`inline-block text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full border ${badgeColor}`}
@@ -158,7 +158,7 @@ const SectionHeading: React.FC<{
 
       {subtitle && (
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
           className="text-slate-500 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto"
@@ -560,7 +560,7 @@ export const LandingPage: React.FC = () => {
         {/* ── Floating Pill Navbar ── */}
         <nav className="sticky top-3 z-50 max-w-5xl mx-auto pt-3">
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             className={`rounded-full px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between border transition-all duration-500 ${
@@ -612,7 +612,7 @@ export const LandingPage: React.FC = () => {
         >
           {/* Badge pill */}
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-white text-xs font-semibold shadow-sm"
@@ -738,9 +738,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Floating Feature Pill — Left */}
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut' }}
+            <div
               className="hidden lg:flex absolute -left-4 top-1/4 p-3.5 rounded-2xl bg-white/95 backdrop-blur-lg border border-slate-200/80 shadow-xl items-center gap-3 max-w-[240px] z-30"
             >
               <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
@@ -750,12 +748,10 @@ export const LandingPage: React.FC = () => {
                 <span className="text-xs font-bold text-slate-900 block">1-Click Starter Kit</span>
                 <span className="text-[10px] text-slate-500 block leading-snug">Classes 1–10 &amp; CBSE Subjects seeded instantly.</span>
               </div>
-            </motion.div>
+            </div>
 
             {/* Floating Feature Pill — Right */}
-            <motion.div
-              animate={{ y: [0, 10, 0] }}
-              transition={{ repeat: Infinity, duration: 5.5, ease: 'easeInOut' }}
+            <div
               className="hidden lg:flex absolute -right-4 top-1/3 p-3.5 rounded-2xl bg-white/95 backdrop-blur-lg border border-slate-200/80 shadow-xl items-center gap-3 max-w-[240px] z-30"
             >
               <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
@@ -765,12 +761,10 @@ export const LandingPage: React.FC = () => {
                 <span className="text-xs font-bold text-slate-900 block">Razorpay Settlements</span>
                 <span className="text-[10px] text-slate-500 block leading-snug">Instant UPI, QR &amp; Cards with real-time receipts.</span>
               </div>
-            </motion.div>
+            </div>
 
             {/* Bottom Dark Pill */}
-            <motion.div
-              animate={{ y: [0, -7, 0] }}
-              transition={{ repeat: Infinity, duration: 4.8, ease: 'easeInOut' }}
+            <div
               className="hidden md:flex absolute right-8 -bottom-4 p-3 rounded-2xl bg-slate-950 text-white shadow-xl items-center gap-3 z-30 border border-slate-800"
             >
               <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
@@ -780,7 +774,7 @@ export const LandingPage: React.FC = () => {
                 <span className="text-xs font-bold block">CBSE Attendance Radar</span>
                 <span className="text-[10px] text-slate-400 block">Automated alerts on threshold drops</span>
               </div>
-            </motion.div>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -1102,7 +1096,7 @@ export const LandingPage: React.FC = () => {
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 space-y-16">
           <div className="text-center max-w-3xl mx-auto space-y-5">
             <motion.span
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.98 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
@@ -1124,7 +1118,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             <motion.p
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.25 }}
@@ -1287,7 +1281,7 @@ export const LandingPage: React.FC = () => {
           ═══════════════════════════════════════════════════════════════════════ */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 max-w-6xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -1360,9 +1354,9 @@ export const LandingPage: React.FC = () => {
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm overflow-y-auto">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.98, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              exit={{ opacity: 0, scale: 0.98, y: 8 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 sm:p-8 my-8 relative overflow-hidden text-slate-900"
             >

@@ -73,6 +73,7 @@ export const SuperAdminPage: React.FC = () => {
   const [schools, setSchools] = useState<SchoolTenant[]>([]);
   const [plans, setPlans] = useState<SubscriptionPlanItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'SUSPENDED' | 'TRIAL'>('ALL');
   const [planFilter, setPlanFilter] = useState<string>('ALL');
@@ -87,129 +88,32 @@ export const SuperAdminPage: React.FC = () => {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  // 1. Initial Data Fetch
+  // 1. Initial Data Fetch — no fake fallbacks: surface failures instead
   const loadData = async () => {
     setLoading(true);
-    try {
-      const [schoolsRes, plansRes] = await Promise.all([
-        schoolService.listSchools().catch(() => ({
-          schools: [
-            {
-              id: 'sch_1',
-              name: 'Delhi Public Academy',
-              code: 'DPA-DELHI',
-              email: 'principal@dpa.edu',
-              phone: '+91 98101 23456',
-              address: 'Sector 4, RK Puram, New Delhi',
-              status: 'ACTIVE' as const,
-              maxStudents: 2500,
-              createdAt: '2026-01-15T00:00:00.000Z',
-              _count: { students: 1840, teachers: 74, classes: 12 },
-              subscriptions: [{ plan: 'PRO' as const, status: 'ACTIVE', amount: 99, currentPeriodEnd: '2026-12-31' }],
-            },
-            {
-              id: 'sch_2',
-              name: 'Greenwood International School',
-              code: 'GW-MUMBAI',
-              email: 'admin@greenwood.edu',
-              phone: '+91 98202 34567',
-              address: 'Bandra West, Mumbai',
-              status: 'ACTIVE' as const,
-              maxStudents: 1000,
-              createdAt: '2026-02-01T00:00:00.000Z',
-              _count: { students: 840, teachers: 42, classes: 8 },
-              subscriptions: [{ plan: 'BASIC' as const, status: 'ACTIVE', amount: 29, currentPeriodEnd: '2026-11-30' }],
-            },
-            {
-              id: 'sch_3',
-              name: 'St. Xavier High School',
-              code: 'STX-DELHI',
-              email: 'admin@stxavier.edu',
-              phone: '+91 98303 45678',
-              address: 'Civil Lines, Delhi',
-              status: 'ACTIVE' as const,
-              maxStudents: 5000,
-              createdAt: '2026-03-10T00:00:00.000Z',
-              _count: { students: 3100, teachers: 140, classes: 24 },
-              subscriptions: [{ plan: 'ENTERPRISE' as const, status: 'ACTIVE', amount: 299, currentPeriodEnd: '2027-03-10' }],
-            },
-            {
-              id: 'sch_4',
-              name: 'Sunrise Public Academy',
-              code: 'SUN-JAIPUR',
-              email: 'contact@sunrisepublic.in',
-              phone: '+91 98404 56789',
-              address: 'C-Scheme, Jaipur',
-              status: 'TRIAL' as const,
-              maxStudents: 500,
-              createdAt: '2026-04-01T00:00:00.000Z',
-              _count: { students: 320, teachers: 18, classes: 5 },
-              subscriptions: [{ plan: 'BASIC' as const, status: 'TRIAL', amount: 0, currentPeriodEnd: '2026-04-15' }],
-            },
-          ],
-          total: 4,
-        })),
-        subscriptionService.getPlans().catch(() => [
-          {
-            id: 'BASIC' as const,
-            name: 'Basic School Starter',
-            description: 'Essential platform for small schools and pre-schools getting started.',
-            monthlyPrice: 29,
-            annualPrice: 299,
-            maxStudents: 500,
-            features: [
-              'Up to 500 Enrolled Students',
-              'Student & Faculty Profiles',
-              'Daily Attendance Marking',
-              'Class Timetable Scheduling',
-              'School Circulars & Notices',
-              'Standard Email Support',
-            ],
-          },
-          {
-            id: 'PRO' as const,
-            name: 'Professional Academy',
-            popular: true,
-            description: 'Full-featured suite for progressive schools requiring academic & finance automation.',
-            monthlyPrice: 99,
-            annualPrice: 999,
-            maxStudents: 2500,
-            features: [
-              'Up to 2,500 Enrolled Students',
-              'All Starter Features',
-              'Fee Invoicing & UPI Collection',
-              'Homework & Cloudflare R2 Uploads',
-              'Examinations & CBSE Report Cards',
-              'Advanced Defaulter Analytics',
-              'Priority 24/7 Support',
-            ],
-          },
-          {
-            id: 'ENTERPRISE' as const,
-            name: 'Enterprise Multi-Campus',
-            description: 'Scalable infrastructure for premier education institutions and school chains.',
-            monthlyPrice: 299,
-            annualPrice: 2999,
-            maxStudents: 10000,
-            features: [
-              'Up to 10,000 Enrolled Students',
-              'All Professional Features',
-              'Custom Subdomain & School Branding',
-              'Automated Parent SMS & Email Gateway',
-              'Dedicated Database & Audit Logs',
-              'Custom SLA & Technical Account Manager',
-            ],
-          },
-        ]),
-      ]);
+    setLoadError(null);
+    const [schoolsRes, plansRes] = await Promise.allSettled([
+      schoolService.listSchools(),
+      subscriptionService.getPlans(),
+    ]);
 
-      setSchools(schoolsRes.schools);
-      setPlans(plansRes);
-    } catch {
-      showToast('Error syncing super admin metrics', 'error');
-    } finally {
-      setLoading(false);
+    if (schoolsRes.status === 'fulfilled') {
+      setSchools(schoolsRes.value.schools);
     }
+    if (plansRes.status === 'fulfilled') {
+      setPlans(plansRes.value);
+    }
+
+    const failed = [
+      schoolsRes.status === 'rejected' ? 'school tenants' : null,
+      plansRes.status === 'rejected' ? 'subscription plans' : null,
+    ].filter(Boolean);
+    if (failed.length) {
+      const message = `Could not load ${failed.join(' and ')}. Please check the API and retry.`;
+      setLoadError(message);
+      showToast(message, 'error');
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -237,12 +141,8 @@ export const SuperAdminPage: React.FC = () => {
         prev.map((s) => (s.id === school.id ? { ...s, status: newStatus } : s))
       );
       showToast(`School tenant ${school.name} marked as ${newStatus}!`);
-    } catch {
-      // Local fallback simulation if endpoint returns mock
-      setSchools((prev) =>
-        prev.map((s) => (s.id === school.id ? { ...s, status: newStatus } : s))
-      );
-      showToast(`School tenant ${school.name} marked as ${newStatus}!`);
+    } catch (err: any) {
+      showToast(err?.response?.data?.message || `Could not update ${school.name}. Please try again.`, 'error');
     }
   };
 
@@ -263,9 +163,9 @@ export const SuperAdminPage: React.FC = () => {
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -8 }}
             className={`fixed top-6 right-6 z-50 p-4 rounded-2xl shadow-xl flex items-center gap-3 text-sm font-semibold border ${
               toastMessage.type === 'success'
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
@@ -309,6 +209,29 @@ export const SuperAdminPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {loadError && (
+        <div className="p-4 rounded-2xl bg-accent-rose-subtle border border-border text-accent-rose text-xs font-bold flex items-center justify-between gap-3">
+          <span className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            {loadError}
+          </span>
+          <button
+            type="button"
+            onClick={loadData}
+            disabled={loading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-border text-primary hover:bg-surface-raised transition-all cursor-pointer active:scale-95 disabled:opacity-60"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Retry
+          </button>
+        </div>
+      )}
+      {loading && !loadError && (
+        <div className="h-1 w-full rounded-full bg-surface-raised overflow-hidden" aria-busy="true">
+          <div className="h-full w-1/3 bg-accent-blue/60 animate-pulse rounded-full" />
+        </div>
+      )}
 
       {/* 3 Nav Tabs */}
       <div className="flex items-center gap-2 border-b border-border pb-3 overflow-x-auto">
@@ -830,7 +753,7 @@ export const SuperAdminPage: React.FC = () => {
       {showProvisionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
+            initial={{ scale: 0.98, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="w-full max-w-xl bg-surface rounded-3xl p-6 sm:p-8 border border-border shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto"
           >
@@ -872,23 +795,11 @@ export const SuperAdminPage: React.FC = () => {
                   setShowProvisionModal(false);
                   showToast(`School ${newSchool.name} provisioned successfully!`);
                 } catch (err: any) {
-                  // Fallback mock append for local demonstration
-                  const mockCreated: SchoolTenant = {
-                    id: `sch_${Date.now()}`,
-                    name: data.name,
-                    code: data.code,
-                    email: data.email,
-                    phone: data.phone,
-                    address: data.address,
-                    status: 'ACTIVE',
-                    maxStudents: data.maxStudents || 1500,
-                    createdAt: new Date().toISOString(),
-                    _count: { students: 0, teachers: 0, classes: 0 },
-                    subscriptions: [{ plan: data.plan || 'BASIC', status: 'ACTIVE', amount: 99, currentPeriodEnd: '2027-01-01' }],
-                  };
-                  setSchools([mockCreated, ...schools]);
-                  setShowProvisionModal(false);
-                  showToast(`School ${data.name} provisioned successfully!`);
+                  // Keep the modal open so the admin can correct the input and retry
+                  showToast(
+                    err?.response?.data?.message || 'Could not provision the school. Please check the details and try again.',
+                    'error'
+                  );
                 }
               }}
               className="space-y-4 text-xs"
@@ -1040,7 +951,7 @@ export const SuperAdminPage: React.FC = () => {
       {selectedSchoolDetails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
+            initial={{ scale: 0.98, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="w-full max-w-lg bg-surface rounded-3xl p-6 sm:p-8 border border-border shadow-2xl space-y-6"
           >

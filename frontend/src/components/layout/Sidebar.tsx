@@ -67,7 +67,6 @@ export const Sidebar: React.FC = () => {
         { name: 'Attendance', to: '/attendance', icon: CalendarCheck },
         { name: 'Timetable', to: '/timetable', icon: Clock },
         { name: 'Exams', to: '/exams', icon: Award },
-        { name: 'Finance', to: '/finance', icon: DollarSign },
         { name: 'Notice', to: '/announcements', icon: Bell },
         { name: 'Calendar', to: '/calendar', icon: Calendar },
       ];

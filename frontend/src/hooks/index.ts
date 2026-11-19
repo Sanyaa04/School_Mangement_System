@@ -10,3 +10,4 @@ export * from './useAttendance';
 export * from './useAcademics';
 export * from './useDashboard';
 export * from './useAnnouncements';
+export * from './useTimetable';

@@ -27,9 +27,9 @@ export const ClassCard: React.FC<ClassCardProps> = ({ classItem, index }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
+      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1], delay: Math.min(index, 8) * 0.03 }}
       className="bg-surface rounded-3xl p-6 border border-border shadow-card hover:shadow-card transition-all"
     >
       <div className="flex items-center justify-between mb-4">

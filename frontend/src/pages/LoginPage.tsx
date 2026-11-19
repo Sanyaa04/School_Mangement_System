@@ -112,7 +112,7 @@ export const LoginPage: React.FC = () => {
 
       {/* Login Card */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-md bg-surface p-8 sm:p-10 rounded-4xl border border-border shadow-card space-y-6"
       >

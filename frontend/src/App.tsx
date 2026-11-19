@@ -6,6 +6,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MotionConfig } from 'framer-motion';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AppLayout } from './components/layout/AppLayout';
@@ -93,6 +94,9 @@ const RootFallback: React.FC = () => {
 
 export function App() {
   return (
+    // Global motion defaults: smooth ease-out tween instead of framer's default spring,
+    // and respect the OS "reduce motion" preference.
+    <MotionConfig transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }} reducedMotion="user">
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
@@ -148,6 +152,7 @@ export function App() {
     </AuthProvider>
     </QueryClientProvider>
     </ThemeProvider>
+    </MotionConfig>
   );
 }
 

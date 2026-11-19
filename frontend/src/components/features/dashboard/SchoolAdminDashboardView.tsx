@@ -60,7 +60,7 @@ export const SchoolAdminDashboardView: React.FC<SchoolAdminDashboardViewProps> =
     <div className="space-y-6">
       {/* Admin Hero Banner */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         className="rounded-3xl bg-gradient-to-r from-[#0284C7] via-[#0EA5E9] to-[#38BDF8] p-8 text-white shadow-card relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
       >
@@ -158,14 +158,18 @@ export const SchoolAdminDashboardView: React.FC<SchoolAdminDashboardViewProps> =
           </div>
           <div className="mt-3">
             <span className="text-3xl font-extrabold text-primary">
-              {kpi?.todayAttendance
-                ? `${kpi.todayAttendance.present} / ${kpi.todayAttendance.total}`
-                : (kpi?.totalStudents ? `0 / ${kpi.totalStudents}` : '0 / 0')}
+              {kpi?.todayAttendance?.total !== undefined
+                ? `${kpi.todayAttendance.present ?? 0} / ${kpi.todayAttendance.total}`
+                : kpi?.todayAttendance
+                  ? `${kpi.todayAttendance.rate}%`
+                  : (kpi?.totalStudents ? `0 / ${kpi.totalStudents}` : '0 / 0')}
             </span>
             <p className="text-xs text-muted mt-1">
-              {kpi?.todayAttendance
+              {kpi?.todayAttendance?.absent !== undefined
                 ? `${kpi.todayAttendance.absent} Absent across sections`
-                : 'No attendance marked today'}
+                : kpi?.todayAttendance
+                  ? 'Present rate across marked sections'
+                  : 'No attendance marked today'}
             </p>
           </div>
         </div>

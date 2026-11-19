@@ -5,6 +5,18 @@
 
 import { api } from '../lib/api';
 
+/** Mirrors the Prisma `DayOfWeek` enum — the API sends these strings, not numbers. */
+export type DayOfWeek =
+  | 'MONDAY'
+  | 'TUESDAY'
+  | 'WEDNESDAY'
+  | 'THURSDAY'
+  | 'FRIDAY'
+  | 'SATURDAY'
+  | 'SUNDAY';
+
+export const SCHOOL_DAYS: DayOfWeek[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+
 export interface TimetableEntry {
   id: string;
   schoolId: string;
@@ -13,16 +25,19 @@ export interface TimetableEntry {
   sectionId: string;
   subjectId: string;
   teacherId?: string | null;
-  dayOfWeek: number; // 1 = Monday, 6 = Saturday
+  dayOfWeek: DayOfWeek;
   periodNumber: number;
-  startTime: string;
-  endTime: string;
+  startTime: string; // "09:00"
+  endTime: string; // "09:45"
   roomNumber?: string | null;
-  subject?: { name: string; code: string };
-  teacher?: { id: string; user: { name: string } };
-  class?: { name: string };
-  section?: { name: string };
+  subject?: { id?: string; name: string; code: string };
+  teacher?: { id: string; designation?: string | null; user: { id?: string; name: string } } | null;
+  class?: { id?: string; name: string };
+  section?: { id?: string; name: string };
 }
+
+/** `GET /timetable` returns entries grouped by day (MONDAY…SATURDAY), each sorted by period. */
+export type WeeklyTimetable = Partial<Record<DayOfWeek, TimetableEntry[]>>;
 
 export interface CreateTimetableEntryDto {
   academicYearId: string;
@@ -30,7 +45,7 @@ export interface CreateTimetableEntryDto {
   sectionId: string;
   subjectId: string;
   teacherId?: string;
-  dayOfWeek: number;
+  dayOfWeek: DayOfWeek;
   periodNumber: number;
   startTime: string;
   endTime: string;
@@ -46,11 +61,11 @@ export interface TimetableFilters {
 
 export const timetableService = {
   /**
-   * Fetch timetable entries matching filters
+   * Fetch the weekly timetable (grouped by day) matching filters
    */
-  async getTimetable(filters?: TimetableFilters): Promise<TimetableEntry[]> {
-    const response = await api.get<{ data: TimetableEntry[] }>('/timetable', { params: filters });
-    return response.data.data;
+  async getTimetable(filters?: TimetableFilters): Promise<WeeklyTimetable> {
+    const response = await api.get<{ data: WeeklyTimetable }>('/timetable', { params: filters });
+    return response.data.data ?? {};
   },
 
   /**

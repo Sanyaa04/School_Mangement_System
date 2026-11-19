@@ -19,6 +19,7 @@ import {
   BookOpen,
   Users,
   GraduationCap,
+  RefreshCw,
   FileText,
   Filter,
   TrendingUp,
@@ -46,6 +47,9 @@ export const ExamsPage: React.FC = () => {
   const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
   const [selectedExam, setSelectedExam] = useState<ExamItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [detailsLoading, setDetailsLoading] = useState(false);
 
   // Modals
   const [showCreateExamModal, setShowCreateExamModal] = useState(false);
@@ -89,15 +93,30 @@ export const ExamsPage: React.FC = () => {
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
+      setLoadError(null);
       try {
-        const [examsData, classesData, subjectsData, yearsData, studentsData] = await Promise.all([
-          examService.listExams().catch(() => []),
-          academicService.getClasses().catch(() => []),
-          academicService.getSubjects().catch(() => []),
-          academicService.getAcademicYears().catch(() => []),
+        // allSettled + explicit error reporting: never hide an API failure behind an empty list
+        const results = await Promise.allSettled([
+          examService.listExams(),
+          academicService.getClasses(),
+          academicService.getSubjects(),
+          academicService.getAcademicYears(),
           // Only fetch full school student roster for teacher/admin to prevent 403 Forbidden
-          isTeacher ? studentService.getStudents().catch(() => []) : Promise.resolve([]),
-        ]);
+          isTeacher ? studentService.getStudents() : Promise.resolve([] as Student[]),
+        ] as const);
+        const [examsRes, classesRes, subjectsRes, yearsRes, studentsRes] = results;
+        const labels = ['exams', 'classes', 'subjects', 'academic years', 'students'];
+        const failed = results
+          .map((r, i) => (r.status === 'rejected' ? labels[i] : null))
+          .filter(Boolean);
+        if (failed.length) {
+          setLoadError(`Could not load ${failed.join(', ')}. Some information below may be incomplete.`);
+        }
+        const examsData = examsRes.status === 'fulfilled' ? examsRes.value : [];
+        const classesData = classesRes.status === 'fulfilled' ? classesRes.value : [];
+        const subjectsData = subjectsRes.status === 'fulfilled' ? subjectsRes.value : [];
+        const yearsData = yearsRes.status === 'fulfilled' ? yearsRes.value : [];
+        const studentsData = studentsRes.status === 'fulfilled' ? studentsRes.value : [];
 
         setExams(examsData);
         setClasses(classesData);
@@ -105,7 +124,9 @@ export const ExamsPage: React.FC = () => {
         setAcademicYears(yearsData);
 
         if (examsData.length > 0) {
-          setSelectedExam(examsData[0]);
+          // Keep already-fetched details (date sheet) if this is the same exam — a repeated
+          // initial load (e.g. StrictMode double effects, Retry) must not wipe them out.
+          setSelectedExam((prev) => (prev?.id === examsData[0].id && prev.subjects ? prev : examsData[0]));
           setMarksExamId(examsData[0].id);
         }
         if (classesData.length > 0) {
@@ -135,27 +156,31 @@ export const ExamsPage: React.FC = () => {
             setReportSearchStudentId(formattedStudents[0].id);
           }
         }
-      } catch (err: any) {
-        showToast('Error loading exam records. Please refresh.', 'error');
+      } catch {
+        setLoadError('Error loading exam records. Please retry.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchInitialData();
-  }, [user?.role, user?.studentProfile?.id, user?.id]);
+  }, [user?.role, user?.studentProfile?.id, user?.id, reloadKey]);
 
   // 2. Fetch specific exam details when selectedExam changes
   useEffect(() => {
     if (!selectedExam?.id) return;
+    setDetailsLoading(true);
     examService.getExamDetails(selectedExam.id).then((detailed) => {
       setSelectedExam(detailed);
-    }).catch(() => {});
+    }).catch(() => {
+      showToast('Could not load the date sheet for this exam.', 'error');
+    }).finally(() => setDetailsLoading(false));
   }, [selectedExam?.id]);
 
   // 3. Load students for marks entry (only for teachers/admins)
   useEffect(() => {
-    if (isStudent || !marksClassId) return;
+    // Roster is only needed (and only permitted) for teachers/admins entering marks
+    if (!isTeacher || !marksClassId) return;
     studentService.getStudents({ classId: marksClassId }).then((students: Student[]) => {
       const roster = students.map((s: Student, idx: number) => ({
         studentId: s.id,
@@ -165,8 +190,11 @@ export const ExamsPage: React.FC = () => {
         remarks: 'Good grasp of concepts',
       }));
       setMarksStudents(roster);
-    }).catch(() => {});
-  }, [marksClassId, isStudent]);
+    }).catch(() => {
+      setMarksStudents([]);
+      showToast('Could not load the student roster for this class.', 'error');
+    });
+  }, [marksClassId, isTeacher]);
 
   // Helper: CBSE 9-Point Grading Scale
   const getCbseGrade = (marks: number, max: number = 100) => {
@@ -237,9 +265,9 @@ export const ExamsPage: React.FC = () => {
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -8 }}
             className={`fixed top-6 right-6 z-50 p-4 rounded-2xl shadow-xl flex items-center gap-3 text-sm font-semibold border ${
               toastMessage.type === 'success'
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
@@ -285,6 +313,29 @@ export const ExamsPage: React.FC = () => {
         )}
       </div>
 
+      {loadError && (
+        <div className="p-4 rounded-2xl bg-accent-rose-subtle border border-border text-accent-rose text-xs font-bold flex items-center justify-between gap-3">
+          <span className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            {loadError}
+          </span>
+          <button
+            type="button"
+            onClick={() => setReloadKey((k) => k + 1)}
+            disabled={loading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-border text-primary hover:bg-surface-raised transition-all cursor-pointer active:scale-95 disabled:opacity-60"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Retry
+          </button>
+        </div>
+      )}
+      {loading && !loadError && (
+        <div className="h-1 w-full rounded-full bg-surface-raised overflow-hidden" aria-busy="true">
+          <div className="h-full w-1/3 bg-accent-blue/60 animate-pulse rounded-full" />
+        </div>
+      )}
+
       {/* KPI Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-3xl bg-surface border border-border shadow-card flex items-center gap-4">
@@ -304,7 +355,7 @@ export const ExamsPage: React.FC = () => {
           <div>
             <span className="text-xs text-muted font-bold block uppercase tracking-wider">Scheduled Subjects</span>
             <span className="text-2xl font-black text-primary">
-              {exams.reduce((acc, curr) => acc + (curr.subjects?.length || 0), 0) || 18}
+              {exams.reduce((acc, curr) => acc + (curr._count?.subjects ?? curr.subjects?.length ?? 0), 0)}
             </span>
           </div>
         </div>
@@ -516,6 +567,16 @@ export const ExamsPage: React.FC = () => {
                           </td>
                         </tr>
                       ))
+                    ) : detailsLoading ? (
+                      <tr>
+                        <td colSpan={6} className="py-6" aria-busy="true">
+                          <div className="space-y-2">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                              <div key={i} className="h-9 rounded-xl bg-surface-raised animate-pulse" />
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
                     ) : (
                       <tr>
                         <td colSpan={6} className="py-12 text-center text-muted">
@@ -928,7 +989,7 @@ export const ExamsPage: React.FC = () => {
       {showCreateExamModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
+            initial={{ scale: 0.98, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="w-full max-w-lg bg-surface rounded-3xl p-6 sm:p-8 border border-border shadow-2xl space-y-6"
           >
@@ -1050,7 +1111,7 @@ export const ExamsPage: React.FC = () => {
       {showAddSubjectModal && selectedExam && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
+            initial={{ scale: 0.98, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="w-full max-w-lg bg-surface rounded-3xl p-6 sm:p-8 border border-border shadow-2xl space-y-6"
           >

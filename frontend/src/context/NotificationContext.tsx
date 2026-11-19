@@ -11,6 +11,7 @@ import type {
   CreateNotificationPayload,
 } from '../types/notification.types';
 import { useUIStore } from '../store/useUIStore';
+import { useAuth } from './AuthContext';
 
 interface NotificationContextType {
   notifications: NotificationItem[];
@@ -161,8 +162,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [playChime, unreadCount, updateUnreadState]);
 
-  // Initial load + periodic polling (every 40 seconds)
+  // Initial load + periodic polling (every 40 seconds) — only while signed in,
+  // otherwise every public page fires 401s at /notifications
+  const { user } = useAuth();
+  const userId = user?.id;
   useEffect(() => {
+    if (!userId) return;
     refreshNotifications();
 
     const interval = setInterval(() => {
@@ -170,7 +175,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }, 40000);
 
     return () => clearInterval(interval);
-  }, [refreshNotifications]);
+  }, [refreshNotifications, userId]);
 
   // Mark single as read
   const markAsRead = useCallback(

@@ -241,9 +241,9 @@ export const NotificationsPage: React.FC = () => {
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -8 }}
             className="fixed top-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-surface border border-accent-blue/30 text-primary shadow-xl text-sm font-semibold"
           >
             <Sparkles className="w-4 h-4 text-accent-blue" />
@@ -560,9 +560,9 @@ export const NotificationsPage: React.FC = () => {
         {isDispatchModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              exit={{ opacity: 0, scale: 0.98 }}
               className="w-full max-w-lg bg-surface border border-border rounded-3xl shadow-2xl overflow-hidden p-6 space-y-5"
             >
               <div className="flex items-center justify-between">

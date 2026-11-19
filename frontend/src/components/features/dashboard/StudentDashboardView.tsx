@@ -99,7 +99,7 @@ export const StudentDashboardView: React.FC<StudentDashboardViewProps> = ({ user
     <div className="space-y-6">
       {/* Student Hero Banner */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         className="rounded-3xl bg-gradient-to-r from-[#0284C7] via-[#0EA5E9] to-[#38BDF8] p-8 text-white shadow-card relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
       >

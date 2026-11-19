@@ -282,9 +282,9 @@ export const CommandPalette: React.FC<{
 
           {/* Palette Dialog */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            initial={{ opacity: 0, scale: 0.98, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            exit={{ opacity: 0, scale: 0.98, y: -8 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
             className="relative w-full max-w-2xl bg-surface/95 backdrop-blur-2xl border border-border rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[80vh]"
           >

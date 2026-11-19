@@ -26,7 +26,7 @@ export const TeacherProfileDrawer: React.FC<TeacherProfileDrawerProps> = ({
           initial={{ x: '100%' }}
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           className="w-full max-w-md h-full bg-surface shadow-2xl p-6 sm:p-8 flex flex-col justify-between overflow-y-auto border-l border-border"
         >
           <div>

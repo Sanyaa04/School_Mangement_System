@@ -13,6 +13,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useSocket, type ChatMessagePayload } from '../context/SocketContext';
 import { reportService } from '../services/report.service';
+import { PreviewBadge } from '../components/ui/PreviewBadge';
 import confetti from 'canvas-confetti';
 import {
   BookOpen,
@@ -225,9 +226,9 @@ export const LibraryPage: React.FC = () => {
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            exit={{ opacity: 0, y: -8 }}
             className="p-3.5 rounded-2xl bg-accent-green-subtle text-accent-green border border-accent-green/20 text-xs font-semibold flex items-center gap-2 shadow-sm"
           >
             <CheckCircle2 className="w-4 h-4 shrink-0" />
@@ -239,7 +240,10 @@ export const LibraryPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
+          <div className="flex items-center gap-2 flex-wrap">
           <h1 className="text-2xl font-bold text-primary">Library Catalog &amp; Book Issues</h1>
+          <PreviewBadge />
+        </div>
           <p className="text-sm text-secondary">Search library inventory, issue books to students, and track return due dates.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -475,9 +479,9 @@ export const LibraryPage: React.FC = () => {
         {isAddBookModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
+              initial={{ scale: 0.98, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              exit={{ scale: 0.98, opacity: 0 }}
               className="w-full max-w-md bg-surface rounded-3xl p-6 border border-border shadow-2xl space-y-4"
             >
               <div className="flex items-center justify-between pb-2 border-b border-border">
@@ -580,9 +584,9 @@ export const LibraryPage: React.FC = () => {
         {isIssueModalOpen && selectedBookForIssue && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
+              initial={{ scale: 0.98, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              exit={{ scale: 0.98, opacity: 0 }}
               className="w-full max-w-md bg-surface rounded-3xl p-6 border border-border shadow-2xl space-y-4"
             >
               <div className="flex items-center justify-between pb-2 border-b border-border">
@@ -860,7 +864,10 @@ export const MessagesPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-12">
       <div>
-        <h1 className="text-2xl font-bold text-primary">Messages &amp; In-App Chat</h1>
+        <div className="flex items-center gap-2 flex-wrap">
+          <h1 className="text-2xl font-bold text-primary">Messages &amp; In-App Chat</h1>
+          <PreviewBadge />
+        </div>
         <p className="text-sm text-secondary">Collaborate directly with school faculty, department leads, and administrative desks.</p>
       </div>
 
@@ -974,9 +981,9 @@ export const MessagesPage: React.FC = () => {
             {typingUsers[activeContactId] && (
               <div className="flex items-center gap-2 text-xs text-muted italic px-2 py-1">
                 <span className="flex gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent-blue animate-bounce" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent-blue animate-bounce [animation-delay:0.2s]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent-blue animate-bounce [animation-delay:0.4s]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent-blue animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent-blue animate-pulse [animation-delay:0.2s]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent-blue animate-pulse [animation-delay:0.4s]" />
                 </span>
                 <span>{typingUsers[activeContactId]} is typing...</span>
               </div>
@@ -1150,9 +1157,9 @@ export const SettingsPage: React.FC = () => {
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            exit={{ opacity: 0, y: -8 }}
             className="p-3.5 rounded-2xl bg-accent-green-subtle text-accent-green border border-accent-green/20 text-xs font-semibold flex items-center gap-2 shadow-sm"
           >
             <CheckCircle2 className="w-4 h-4 shrink-0" />
@@ -1162,7 +1169,10 @@ export const SettingsPage: React.FC = () => {
       </AnimatePresence>
 
       <div>
-        <h1 className="text-2xl font-bold text-primary">Platform Settings &amp; Preferences</h1>
+        <div className="flex items-center gap-2 flex-wrap">
+          <h1 className="text-2xl font-bold text-primary">Platform Settings &amp; Preferences</h1>
+          <PreviewBadge />
+        </div>
         <p className="text-sm text-secondary">Configure institutional branding, real-time alert dispatchers, security, and daylight contrast.</p>
       </div>
 

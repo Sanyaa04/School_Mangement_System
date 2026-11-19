@@ -120,9 +120,9 @@ export const StudentSubjectsPage: React.FC = () => {
           return (
             <motion.div
               key={sub.id}
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1], delay: Math.min(idx, 8) * 0.03 }}
               onClick={() => navigate(`/my-subjects/${sub.id}`)}
               className="bg-surface rounded-3xl p-6 border border-border shadow-card hover:shadow-card transition-all cursor-pointer flex flex-col justify-between group hover:-translate-y-1 relative overflow-hidden"
             >

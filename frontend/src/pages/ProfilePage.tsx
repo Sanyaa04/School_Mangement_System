@@ -135,7 +135,7 @@ export const ProfilePage: React.FC = () => {
       {/* 1. TOP HEADER BANNER & PROFILE CARD                                       */}
       {/* ========================================================================= */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-surface rounded-3xl p-6 sm:p-8 border border-border shadow-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative overflow-hidden"
       >
@@ -237,7 +237,7 @@ export const ProfilePage: React.FC = () => {
       {/* ========================================================================= */}
       {activeTab === 'PERSONAL' && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-surface rounded-3xl p-6 sm:p-8 border border-border shadow-card"
         >
@@ -358,7 +358,7 @@ export const ProfilePage: React.FC = () => {
       {/* ========================================================================= */}
       {activeTab === 'SECURITY' && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-surface rounded-3xl p-6 sm:p-8 border border-border shadow-card space-y-6"
         >
@@ -479,7 +479,7 @@ export const ProfilePage: React.FC = () => {
       {/* ========================================================================= */}
       {activeTab === 'ACADEMIC' && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-surface rounded-3xl p-6 sm:p-8 border border-border shadow-card space-y-6"
         >
@@ -543,7 +543,7 @@ export const ProfilePage: React.FC = () => {
       {/* ========================================================================= */}
       {activeTab === 'PREFERENCES' && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-surface rounded-3xl p-6 sm:p-8 border border-border shadow-card space-y-6"
         >

@@ -79,9 +79,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string): Promise<AuthUser> => {
     const res = await api.post('/auth/login', { email, password });
-    const { user: loggedInUser, accessToken } = res.data.data;
+    const { user: loginUser, accessToken } = res.data.data;
     if (accessToken) {
       localStorage.setItem('schoolhub_token', accessToken);
+    }
+    // The login payload omits role profiles (student enrollment, teacher id) that
+    // pages like Timetable/Attendance rely on — hydrate them from /auth/me.
+    let loggedInUser: AuthUser = loginUser;
+    try {
+      const me = await api.get('/auth/me');
+      const profile = me.data?.data;
+      if (profile) {
+        loggedInUser = {
+          ...loginUser,
+          studentProfile: profile.studentProfile,
+          teacherProfile: profile.teacherProfile,
+        };
+      }
+    } catch {
+      // Non-fatal: the profile is fetched again on next app load
     }
     localStorage.setItem('schoolhub_user', JSON.stringify(loggedInUser));
     setUser(loggedInUser);

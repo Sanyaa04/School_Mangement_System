@@ -78,9 +78,9 @@ export const CreateFeeStructureModal: React.FC<CreateFeeStructureModalProps> = (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
         <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
+          initial={{ scale: 0.98, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
+          exit={{ scale: 0.98, opacity: 0 }}
           className="bg-surface rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-border space-y-4"
         >
           <div className="flex items-center justify-between pb-3 border-b border-border">

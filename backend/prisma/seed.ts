@@ -14,6 +14,7 @@ import {
   ExamStatus,
   InvoiceStatus,
   PaymentMethod,
+  DayOfWeek,
 } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../src/db/prisma.js';
@@ -402,7 +403,17 @@ async function main() {
   });
 
   // 11. Seed Fee Structure, Invoice & Payment
-  const feeStructure = await prisma.feeStructure.create({
+  const existingFeeStructure = await prisma.feeStructure.findFirst({
+    where: {
+      schoolId: school.id,
+      classId: class10.id,
+      name: 'Term 1 Tuition & Lab Fee 2026',
+    },
+  });
+
+  const feeStructure =
+    existingFeeStructure ??
+    (await prisma.feeStructure.create({
     data: {
       schoolId: school.id,
       academicYearId: academicYear.id,
@@ -418,7 +429,7 @@ async function main() {
         ],
       },
     },
-  });
+  }));
 
   const invoice = await prisma.feeInvoice.upsert({
     where: { invoiceNumber: 'INV-2026-00001' },
@@ -697,6 +708,143 @@ async function main() {
     },
   });
 
+  // 15. Seed Additional Faculty, Subjects & Weekly Timetable (Class 10-A)
+  const seedTeacher = async (
+    email: string,
+    name: string,
+    employeeId: string,
+    designation: string,
+    qualification: string,
+    gender: Gender,
+  ) => {
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: {},
+      create: {
+        schoolId: school.id,
+        email,
+        passwordHash: teacherPasswordHash,
+        name,
+        role: UserRole.TEACHER,
+      },
+    });
+    return prisma.teacher.upsert({
+      where: { schoolId_employeeId: { schoolId: school.id, employeeId } },
+      update: {},
+      create: {
+        schoolId: school.id,
+        userId: user.id,
+        employeeId,
+        designation,
+        qualification,
+        gender,
+      },
+    });
+  };
+
+  const scienceTeacher = await seedTeacher(
+    'priya.patel@dpa.edu',
+    'Priya Patel',
+    'TCH-002',
+    'PGT Science',
+    'M.Sc. Physics, B.Ed.',
+    Gender.FEMALE,
+  );
+  const englishTeacher = await seedTeacher(
+    'sunita.rao@dpa.edu',
+    'Sunita Rao',
+    'TCH-003',
+    'TGT English & Hindi',
+    'M.A. English, B.Ed.',
+    Gender.FEMALE,
+  );
+
+  const seedSubject = (code: string, name: string) =>
+    prisma.subject.upsert({
+      where: { schoolId_code: { schoolId: school.id, code } },
+      update: {},
+      create: { schoolId: school.id, name, code, type: 'CORE' },
+    });
+
+  const hindiSubject = await seedSubject('HIN101', 'Hindi');
+  const computerSubject = await seedSubject('CS101', 'Computer Science');
+
+  // Subject → teacher → room mapping for Class 10
+  const periodPlan = [
+    { subject: mathSubject, teacher: teacher, room: sectionA.roomNumber ?? 'Room 101' },
+    { subject: scienceSubject, teacher: scienceTeacher, room: 'Science Lab 1' },
+    { subject: englishSubject, teacher: englishTeacher, room: sectionA.roomNumber ?? 'Room 101' },
+    { subject: sstSubject, teacher: englishTeacher, room: sectionA.roomNumber ?? 'Room 101' },
+    { subject: hindiSubject, teacher: englishTeacher, room: sectionA.roomNumber ?? 'Room 101' },
+    { subject: computerSubject, teacher: scienceTeacher, room: 'Computer Lab' },
+  ];
+
+  for (const plan of periodPlan) {
+    await prisma.classSubject.upsert({
+      where: { classId_subjectId: { classId: class10.id, subjectId: plan.subject.id } },
+      update: {},
+      create: {
+        schoolId: school.id,
+        classId: class10.id,
+        subjectId: plan.subject.id,
+        teacherId: plan.teacher.id,
+      },
+    });
+  }
+
+  const existingTimetableRows = await prisma.timetable.count({
+    where: {
+      schoolId: school.id,
+      academicYearId: academicYear.id,
+      classId: class10.id,
+      sectionId: sectionA.id,
+    },
+  });
+
+  if (existingTimetableRows === 0) {
+    const periodTimes = [
+      ['08:30', '09:15'],
+      ['09:15', '10:00'],
+      ['10:15', '11:00'],
+      ['11:00', '11:45'],
+      ['12:30', '13:15'],
+      ['13:15', '14:00'],
+    ] as const;
+    const weekDays = [
+      DayOfWeek.MONDAY,
+      DayOfWeek.TUESDAY,
+      DayOfWeek.WEDNESDAY,
+      DayOfWeek.THURSDAY,
+      DayOfWeek.FRIDAY,
+      DayOfWeek.SATURDAY,
+    ];
+
+    // Rotate the subject order each day so every subject lands in different slots
+    await prisma.timetable.createMany({
+      data: weekDays.flatMap((dayOfWeek, dayIdx) =>
+        periodTimes.map(([startTime, endTime], periodIdx) => {
+          const plan = periodPlan[(periodIdx + dayIdx) % periodPlan.length];
+          return {
+            schoolId: school.id,
+            academicYearId: academicYear.id,
+            classId: class10.id,
+            sectionId: sectionA.id,
+            subjectId: plan.subject.id,
+            teacherId: plan.teacher.id,
+            dayOfWeek,
+            periodNumber: periodIdx + 1,
+            startTime,
+            endTime,
+            roomNumber: plan.room,
+          };
+        }),
+      ),
+    });
+    console.log('✅ Seeded weekly timetable for Class 10-A (Mon–Sat, 6 periods)');
+  } else {
+    console.log('ℹ️  Timetable for Class 10-A already exists, skipping');
+  }
+
   console.log('\n🎉 Database Seeding Completed Successfully!\n');
   console.log('====================================================');
   console.log('🔑 TEST LOGIN CREDENTIALS:');
@@ -709,6 +857,7 @@ async function main() {
     '🎓 Student: rahul.sharma@dpa.edu | Student@Secure123!',
   );
   console.log('👨‍👩‍👦 Parent: parent@school.com | Parent@123');
+  console.log('More teachers: priya.patel@dpa.edu, sunita.rao@dpa.edu | Teacher@Secure123!');
   console.log('====================================================\n');
 }
 

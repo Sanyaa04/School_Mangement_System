@@ -57,13 +57,23 @@ export const schoolService = {
   listSchools: async (params?: { search?: string; status?: string; page?: number }): Promise<{ schools: SchoolTenant[]; total: number }> => {
     const res = await api.get('/schools', { params });
     const data = res.data?.data;
-    if (Array.isArray(data)) {
-      return { schools: data, total: data.length };
-    }
-    return {
-      schools: data?.schools || data?.items || [],
-      total: data?.total || (data?.schools || []).length,
-    };
+    const raw: any[] = Array.isArray(data) ? data : data?.schools || data?.items || [];
+    // The list endpoint returns flat counts (studentCount, currentPlan…); normalise them
+    // into the nested shape the UI reads (_count, subscriptions).
+    const schools: SchoolTenant[] = raw.map((s) => ({
+      ...s,
+      _count: s._count ?? {
+        students: s.studentCount ?? 0,
+        teachers: s.teacherCount ?? 0,
+        classes: s.classCount ?? 0,
+      },
+      subscriptions:
+        s.subscriptions ??
+        (s.currentPlan
+          ? [{ plan: s.currentPlan, status: s.subscriptionStatus ?? 'ACTIVE', amount: 0, currentPeriodEnd: '' }]
+          : []),
+    }));
+    return { schools, total: data?.total ?? schools.length };
   },
 
   /** Get single school details */

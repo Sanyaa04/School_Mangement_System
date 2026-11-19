@@ -191,9 +191,9 @@ export const NotificationDropdown: React.FC = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.96 }}
+            initial={{ opacity: 0, y: 8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.96 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
             className="absolute right-0 mt-2.5 w-[390px] sm:w-[420px] max-w-[calc(100vw-2rem)] rounded-2xl bg-surface/95 backdrop-blur-2xl border border-border shadow-2xl z-50 overflow-hidden flex flex-col"
           >

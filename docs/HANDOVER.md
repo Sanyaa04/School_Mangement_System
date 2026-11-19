@@ -51,7 +51,9 @@ Around 33 files use Framer Motion with `initial={{ opacity: 0, y: 20 }}` / `init
 
 Small, low-risk, high-visibility changes only. No schema migrations, no big refactors.
 
-### P0.1 Smooth animations (highest priority)
+### ✅ P0.1 Smooth animations (highest priority)
+> Done 2026-11-19 on `feat/phase-0-demo-polish` (commit `12d43c4`).
+
 1. In `frontend/src/App.tsx`, wrap the tree in Framer Motion's `MotionConfig`:
    ```tsx
    <MotionConfig transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }} reducedMotion="user">
@@ -62,27 +64,41 @@ Small, low-risk, high-visibility changes only. No schema migrations, no big refa
 4. Standardise entrances: fade + 6–8px rise (not 20px), modals scale from 0.98 (not 0.9/0.95). Cap list stagger delays (e.g. `Math.min(i, 8) * 0.03`).
 5. Leave `animate-pulse` on loading skeletons as is.
 
-### P0.2 Timetable on real data
+### ✅ P0.2 Timetable on real data
+> Done 2026-11-19 on `feat/phase-0-demo-polish` (commit `d3ebac2`).
+
 1. Add timetable rows to `backend/prisma/seed.ts` for the demo class/section (Mon–Sat, ~6 periods, using seeded subjects/teachers). Keep the seed idempotent.
 2. **Check first**: the backend uses a `DayOfWeek` enum while `frontend/src/services/timetable.service.ts` types `dayOfWeek` as a number — align the frontend type with what the API actually returns.
 3. Replace `initialSchedule` in `TimetablePage.tsx` with a React Query hook (`useTimetable` in `src/hooks/`) over `timetableService`. Add loading skeleton + empty state. Keep the existing visual layout.
 
-### P0.3 Calendar shows real, current dates
+### ✅ P0.3 Calendar shows real, current dates
+> Done 2026-11-19 on `feat/phase-0-demo-polish` (commit `d4b265c`).
+
 1. Build the month grid from the real current month (correct day count, weekday offset, prev/next month buttons).
 2. Populate events from existing APIs: exams (`examService`) and announcements (`announcementService`). No new backend work.
 
-### P0.4 Stop faking success
+### ✅ P0.4 Stop faking success
+> Done 2026-11-19 on `feat/phase-0-demo-polish` (commit `a0569ab`).
+
 1. `SuperAdminPage.tsx`: remove the `mockCreated` fallback and fake fallback lists; show an error state/toast on failure.
 2. `ExamsPage.tsx`: replace silent `.catch(() => [])` with a visible error state.
 
-### P0.5 Label unfinished pages honestly
+### ✅ P0.5 Label unfinished pages honestly
+> Done 2026-11-19 on `feat/phase-0-demo-polish` (commit `8241643`).
+
 Add a small "Preview" badge to the headers of **Library**, **Messages** and **Settings** so nobody presents mock data as live. Do not remove these pages.
 
-### P0.6 Demo readiness check
+### ✅ P0.6 Demo readiness check
+> Done 2026-11-19 on `feat/phase-0-demo-polish` (commit `93db154`).
+
 1. `cd backend && npx prisma db seed` — then log in as each seeded role (super admin, school admin, teacher, student, parent).
 2. Click every sidebar link for each role; fix any crash or console error found.
 3. Run `cd backend && npm test && npm run build` and `cd frontend && npm test && npm run build` — all must pass.
 4. One commit per item above (P0.1 … P0.5), on a feature branch. **Do not push to `main` without the owner's OK.**
+
+**P0.6 result (2026-11-19):** seed run; all 5 roles × every sidebar page checked in headless Chrome — no crashes, no console errors after fixes (only the expected `/auth/me` 401 on the login page). Backend 22/22 tests + build, frontend 13/13 tests + build pass. Fixed along the way: student Finance render loop, admin dashboard KPI shape mismatch (showed all zeros), Super Admin tenant counts shape mismatch, Exams date-sheet race, teacher Finance 403s, notifications polling while signed out, login not hydrating student/teacher profile.
+
+**Still mock / known gaps (deferred, not Phase 0):** Students/Teachers/Notice pages fall back to hardcoded seed lists when the API list is empty (and briefly while loading); student dashboard tiles, student attendance "April 2026" history, admin dashboard fee chart and Class 9/8 attendance rows are static; Messages header claims "End-to-end secure".
 
 ---
 
